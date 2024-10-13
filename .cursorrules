@@ -1,0 +1,80 @@
+rules:
+  - name: "BLoC Pattern"
+    description: "Ensure proper implementation of BLoC pattern"
+    pattern: "class .*Bloc extends Bloc<.*Event, .*State>"
+    message: "BLoC classes should extend Bloc<Event, State>"
+
+  - name: "Equatable Usage"
+    description: "Ensure Equatable is used for State and Event classes"
+    pattern: "class .*State extends Equatable|class .*Event extends Equatable"
+    message: "State and Event classes should extend Equatable"
+
+  - name: "Go Router Configuration"
+    description: "Ensure proper Go Router configuration"
+    pattern: "GoRouter\\(\\s*routes:\\s*\\["
+    message: "GoRouter should be configured with a list of routes"
+
+  - name: "BLoC Event Handling"
+    description: "Ensure events are handled in BLoC classes"
+    pattern: "on<.*Event>\\("
+    message: "BLoC classes should handle events using on<EventType>"
+
+  - name: "Equatable Props Override"
+    description: "Ensure Equatable props are overridden"
+    pattern: "List<Object\\?> get props =>"
+    message: "Equatable classes should override the props getter"
+
+  - name: "Go Router Path Definition"
+    description: "Ensure routes have defined paths"
+    pattern: "GoRoute\\(\\s*path:\\s*'.*'"
+    message: "GoRoute should have a defined path"
+
+  - name: "BLoC Provider Usage"
+    description: "Ensure BlocProvider is used to provide BLoCs"
+    pattern: "BlocProvider\\(<.*Bloc>\\("
+    message: "Use BlocProvider to provide BLoCs to the widget tree"
+
+  - name: "BLoC Consumer Usage"
+    description: "Encourage use of BlocConsumer for complex UI updates"
+    pattern: "BlocConsumer<.*Bloc, .*State>"
+    message: "Consider using BlocConsumer for widgets that need to both listen to and rebuild based on bloc state changes"
+
+  - name: "Go Router Navigation"
+    description: "Ensure proper use of Go Router for navigation"
+    pattern: "context\\.go\\('.*'\\)"
+    message: "Use context.go() for navigation with Go Router"
+
+  - name: "Equatable Comparison"
+    description: "Avoid manual equality comparisons for Equatable classes"
+    pattern: "\\w+\\s*==\\s*\\w+"
+    message: "Avoid manual equality comparisons for Equatable classes, rely on the generated == operator"
+
+  - name: "BLoC State Emissions"
+    description: "Ensure states are emitted in BLoCs"
+    pattern: "emit\\(.*\\)"
+    message: "Use emit() to yield new states in BLoC event handlers"
+
+  - name: "Go Router Error Handling"
+    description: "Ensure error routes are defined"
+    pattern: "errorBuilder:\\s*\\(context, state\\) =>"
+    message: "Define an error route handler in your GoRouter configuration"
+
+  - name: "Repository Pattern"
+    description: "Encourage use of repository pattern"
+    pattern: "class .*Repository"
+    message: "Consider using the repository pattern to abstract data sources"
+
+  - name: "Dependency Injection"
+    description: "Encourage use of dependency injection"
+    pattern: "final .*Repository .*Repository;"
+    message: "Consider using dependency injection for repositories and services"
+
+  - name: "Consistent Naming Convention"
+    description: "Enforce consistent naming for BLoC related classes"
+    pattern: "class (?!.*Bloc|.*Event|.*State).*"
+    message: "BLoC related classes should be suffixed with Bloc, Event, or State"
+
+  - name: "Go Router Redirect"
+    description: "Ensure redirect logic is implemented when necessary"
+    pattern: "redirect:\\s*\\(BuildContext context, GoRouterState state\\) =>"
+    message: "Implement redirect logic in GoRouter for authentication or other conditional navigation"
