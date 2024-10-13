@@ -7,9 +7,11 @@ import 'package:chatroom_app/views/auth/register/register_view.dart';
 import 'package:chatroom_app/views/home/home_view.dart';
 import 'package:chatroom_app/views/room/room_list_view.dart';
 import 'package:chatroom_app/views/room/single_room_view.dart';
+import 'package:chatroom_app/views/settings/settings_view.dart';
 
 final GoRouter router = GoRouter(
   debugLogDiagnostics: true,
+  initialLocation: "/settings",
   observers: [MyNavigatorObserver()],
   routes: <RouteBase>[
     GoRoute(
@@ -45,11 +47,17 @@ final GoRouter router = GoRouter(
         ),
       ],
     ),
+    GoRoute(
+      path: '/settings',
+      builder: (BuildContext context, GoRouterState state) {
+        return const SettingsView();
+      },
+    ),
   ],
   // Add a redirect to implement guards for protected routes
   redirect: (BuildContext context, GoRouterState state) {
     // Implement your authentication logic here
-    bool isAuthenticated = false; // Replace with actual auth check
+    bool isAuthenticated = true; // Replace with actual auth check
     
     if (!isAuthenticated && 
         !(state.matchedLocation == '/login' || state.matchedLocation == '/register')) {
