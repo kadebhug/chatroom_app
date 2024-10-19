@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_database/firebase_database.dart';
 import 'config/routes.dart';
 import 'blocs/theme/theme_bloc.dart';
 import 'blocs/theme/theme_state.dart';
@@ -24,8 +23,6 @@ void main() async {
       options: DefaultFirebaseOptions.currentPlatform,
     );
   }
-  
-  FirebaseDatabase.instance.setPersistenceEnabled(true);
   
   final prefs = await SharedPreferences.getInstance();
   final authRepository = AuthRepository();
