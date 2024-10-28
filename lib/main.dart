@@ -1,18 +1,23 @@
+import 'dart:developer';
+
+import 'package:chatroom_app/blocs/app_block_observer.dart';
+import 'package:chatroom_app/config/routes.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:chatroom_app/config/firebase_options.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'config/routes.dart';
-import 'blocs/theme/theme_bloc.dart';
-import 'blocs/theme/theme_state.dart';
+import 'package:chatroom_app/blocs/theme/theme_bloc.dart';
+import 'package:chatroom_app/blocs/theme/theme_state.dart';
 import 'package:chatroom_app/repositories/auth_repository.dart';
 import 'package:chatroom_app/blocs/auth/auth_bloc.dart';
 
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  Bloc.observer = AppBlocObserver();
 
   if (!kIsWeb && defaultTargetPlatform == TargetPlatform.windows) {
     await Firebase.initializeApp(
@@ -25,13 +30,26 @@ void main() async {
   }
   
   final prefs = await SharedPreferences.getInstance();
+
   final authRepository = AuthRepository();
+  final authBloc = AuthBloc(authRepository: authRepository);
+  await authRepository.user.first; // Wait for initial user value
+
+  // Check initial auth status
+  authBloc.checkAuthStatus();
+
+  // Listen for Auth changes and refresh the GoRouter
+  FirebaseAuth.instance.authStateChanges().listen((User? user) {
+    log("authStateChanges: $user");
+    authBloc.checkAuthStatus();
+    AppRouter.router.refresh();
+  });
   
   runApp(
     MultiBlocProvider(
       providers: [
         BlocProvider(create: (context) => ThemeBloc(prefs)),
-        BlocProvider(create: (context) => AuthBloc(authRepository: authRepository)),
+        BlocProvider(create: (context) => authBloc),
       ],
       child: const MyApp(),
     ),
@@ -48,7 +66,7 @@ class MyApp extends StatelessWidget {
         return MaterialApp.router(
           title: 'Chatroom App',
           theme: themeState.themeData,
-          routerConfig: router,
+          routerConfig: AppRouter.router,
         );
       },
     );

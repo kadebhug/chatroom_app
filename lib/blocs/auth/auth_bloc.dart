@@ -1,3 +1,4 @@
+import 'package:chatroom_app/models/user.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:chatroom_app/repositories/auth_repository.dart';
 import 'auth_event.dart';
@@ -49,6 +50,19 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     try {
       await _authRepository.signOut();
       emit(AuthInitial());
+    } catch (e) {
+      emit(AuthFailure(e.toString()));
+    }
+  }
+
+  void checkAuthStatus() async {
+    try {
+      final user = await _authRepository.user.first;
+      if (user != User.empty) {
+        emit(AuthSuccess());
+      } else {
+        emit(AuthInitial());
+      }
     } catch (e) {
       emit(AuthFailure(e.toString()));
     }
