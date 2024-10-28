@@ -13,7 +13,8 @@ import 'package:chatroom_app/blocs/theme/theme_bloc.dart';
 import 'package:chatroom_app/blocs/theme/theme_state.dart';
 import 'package:chatroom_app/repositories/auth_repository.dart';
 import 'package:chatroom_app/blocs/auth/auth_bloc.dart';
-
+import 'package:chatroom_app/repositories/room_repository.dart';
+import 'package:chatroom_app/blocs/room/room_bloc.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,19 +31,22 @@ void main() async {
   }
   
   final prefs = await SharedPreferences.getInstance();
-
   final authRepository = AuthRepository();
   final authBloc = AuthBloc(authRepository: authRepository);
-  await authRepository.user.first; // Wait for initial user value
-
+  final roomRepository = RoomRepository();
+  
+  // Wait for initial user value
+  await authRepository.user.first;
+  
+  // Initialize router with authBloc
+  AppRouter.initialize(authBloc);
+  
   // Check initial auth status
   authBloc.checkAuthStatus();
 
   // Listen for Auth changes and refresh the GoRouter
   FirebaseAuth.instance.authStateChanges().listen((User? user) {
-    log("authStateChanges: $user");
     authBloc.checkAuthStatus();
-    AppRouter.router.refresh();
   });
   
   runApp(
@@ -50,6 +54,7 @@ void main() async {
       providers: [
         BlocProvider(create: (context) => ThemeBloc(prefs)),
         BlocProvider(create: (context) => authBloc),
+        BlocProvider(create: (context) => RoomBloc(roomRepository: roomRepository)),
       ],
       child: const MyApp(),
     ),

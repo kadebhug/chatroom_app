@@ -1,10 +1,9 @@
+import 'dart:async';
 import 'dart:developer';
 
 import 'package:chatroom_app/blocs/auth/auth_bloc.dart';
 import 'package:chatroom_app/blocs/auth/auth_state.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:chatroom_app/views/auth/login/login_view.dart';
 import 'package:chatroom_app/views/auth/register/register_view.dart';
@@ -12,7 +11,6 @@ import 'package:chatroom_app/views/home/home_view.dart';
 import 'package:chatroom_app/views/room/room_list_view.dart';
 import 'package:chatroom_app/views/room/single_room_view.dart';
 import 'package:chatroom_app/views/settings/settings_view.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 abstract class AppRouter {
   static const login = 'login';
@@ -67,27 +65,29 @@ abstract class AppRouter {
     ),
   ];
 
-  static GoRouter router = GoRouter(
-    debugLogDiagnostics: kDebugMode,
-    initialLocation: "/login",
-    observers: [MyNavigatorObserver()],
-    routes: routes,
-    redirect: redirect,
-  );
+  static late final GoRouter router;
+  static late final AuthBloc authBloc;
+
+  static void initialize(AuthBloc bloc) {
+    authBloc = bloc;
+    router = GoRouter(
+      routes: routes,
+      redirect: redirect,
+      refreshListenable: GoRouterRefreshStream(authBloc.stream),
+    );
+  }
 
   static String? redirect(BuildContext context, GoRouterState state) {
-    final authState = context.read<AuthBloc>().state;
+    final authState = authBloc.state;  // Use the static authBloc instead of context.read
     final isAuthRoute = state.matchedLocation == '/login' || 
                        state.matchedLocation == '/register';
+
     if (authState is AuthSuccess) {
-    log('authState --> AUTH SUCCESS --> ${authState.toString()}');
-      // If user is authenticated and tries to access auth routes, redirect to home
       if (isAuthRoute) {
         return '/';
       }
       return null;
     } else {
-      // If user is not authenticated and tries to access protected routes, redirect to login
       if (!isAuthRoute) {
         return '/login';
       }
@@ -105,5 +105,23 @@ class MyNavigatorObserver extends NavigatorObserver {
   @override
   void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
     log("ROUTE POPPED: ${route.toString()} <-- ${previousRoute.toString()}");
+  }
+}
+
+// Add this class to handle router refreshes based on AuthBloc state changes
+class GoRouterRefreshStream extends ChangeNotifier {
+  GoRouterRefreshStream(Stream<dynamic> stream) {
+    notifyListeners();
+    _subscription = stream.asBroadcastStream().listen(
+          (dynamic _) => notifyListeners(),
+        );
+  }
+
+  late final StreamSubscription<dynamic> _subscription;
+
+  @override
+  void dispose() {
+    _subscription.cancel();
+    super.dispose();
   }
 }
