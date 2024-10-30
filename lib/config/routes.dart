@@ -8,7 +8,6 @@ import 'package:go_router/go_router.dart';
 import 'package:chatroom_app/views/auth/login/login_view.dart';
 import 'package:chatroom_app/views/auth/register/register_view.dart';
 import 'package:chatroom_app/views/home/home_view.dart';
-import 'package:chatroom_app/views/room/room_list_view.dart';
 import 'package:chatroom_app/views/room/single_room_view.dart';
 import 'package:chatroom_app/views/settings/settings_view.dart';
 
@@ -41,19 +40,11 @@ abstract class AppRouter {
       },
       routes: [
         GoRoute(
-          path: 'rooms',
+          path: 'rooms/:id',
           builder: (BuildContext context, GoRouterState state) {
-            return const RoomListView();
+            final roomId = state.pathParameters['id']!;
+            return SingleRoomView(roomId: roomId);
           },
-          routes: [
-            GoRoute(
-              path: ':id',
-              builder: (BuildContext context, GoRouterState state) {
-                final roomId = state.pathParameters['id'];
-                return SingleRoomView(roomId: roomId!);
-              },
-            ),
-          ],
         ),
         GoRoute(
           path: '/settings',

@@ -1,6 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-enum RoomType { private, public }
+enum RoomType {
+  private,
+  public;
+
+  @override
+  String toString() {
+    return 'RoomType.$name';
+  }
+}
 
 class Room {
   final String id;
@@ -25,11 +33,12 @@ class Room {
       'createdBy': createdBy,
       'type': type.toString(),
       'members': members,
-      'createdAt': createdAt,
+      'createdAt': Timestamp.fromDate(createdAt),
     };
   }
 
   factory Room.fromMap(String id, Map<String, dynamic> map) {
+    print('Converting room data: $map');
     return Room(
       id: id,
       name: map['name'] as String,
@@ -38,7 +47,7 @@ class Room {
         (e) => e.toString() == map['type'],
         orElse: () => RoomType.public,
       ),
-      members: List<String>.from(map['members']),
+      members: List<String>.from(map['members'] ?? []),
       createdAt: (map['createdAt'] as Timestamp).toDate(),
     );
   }

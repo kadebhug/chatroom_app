@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:chatroom_app/models/room.dart';
+import 'package:chatroom_app/models/message.dart';
 
 abstract class RoomEvent extends Equatable {
   @override
@@ -22,3 +23,47 @@ class CreateRoomRequested extends RoomEvent {
 }
 
 class LoadUsersRequested extends RoomEvent {}
+
+class LoadRoomsRequested extends RoomEvent {} // New event
+
+class LoadMessagesRequested extends RoomEvent {
+  final String roomId;
+
+  LoadMessagesRequested(this.roomId);
+
+  @override
+  List<Object?> get props => [roomId];
+}
+
+class SendMessageRequested extends RoomEvent {
+  final String roomId;
+  final String content;
+
+  SendMessageRequested({
+    required this.roomId,
+    required this.content,
+  });
+
+  @override
+  List<Object?> get props => [roomId, content];
+}
+
+class _MessagesUpdated extends RoomEvent {
+  final List<Message> messages;
+
+  _MessagesUpdated(this.messages);
+
+  @override
+  List<Object?> get props => [messages];
+}
+
+class LoadPublicRoomsRequested extends RoomEvent {}
+
+class JoinRoomRequested extends RoomEvent {
+  final String roomId;
+
+  JoinRoomRequested(this.roomId);
+
+  @override
+  List<Object?> get props => [roomId];
+}
