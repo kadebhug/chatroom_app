@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:chatroom_app/blocs/room/room_bloc.dart';
-import 'package:chatroom_app/blocs/room/room_event.dart';
-import 'package:chatroom_app/blocs/room/room_state.dart';
 import 'package:chatroom_app/repositories/room_repository.dart';
 import 'package:chatroom_app/views/home/home_view.dart';
 import 'package:firebase_auth/firebase_auth.dart';

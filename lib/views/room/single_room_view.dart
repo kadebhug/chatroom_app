@@ -1,9 +1,7 @@
+import 'package:chatroom_app/repositories/room_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:chatroom_app/blocs/room/room_bloc.dart';
-import 'package:chatroom_app/blocs/room/room_event.dart';
-import 'package:chatroom_app/blocs/room/room_state.dart';
-import 'package:chatroom_app/models/message.dart';
+import 'package:chatroom_app/blocs/message/message_bloc.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class SingleRoomView extends StatefulWidget {
@@ -18,11 +16,13 @@ class SingleRoomView extends StatefulWidget {
 class _SingleRoomViewState extends State<SingleRoomView> {
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+  late MessageBloc _messageBloc;
 
   @override
   void initState() {
     super.initState();
-    context.read<RoomBloc>().add(LoadMessagesRequested(widget.roomId));
+    _messageBloc = context.read<MessageBloc>();
+    _messageBloc.add(LoadMessagesRequested(widget.roomId));
   }
 
   @override
@@ -35,26 +35,55 @@ class _SingleRoomViewState extends State<SingleRoomView> {
   void _sendMessage() {
     final message = _messageController.text.trim();
     if (message.isNotEmpty) {
-      context.read<RoomBloc>().add(
-            SendMessageRequested(
-              roomId: widget.roomId,
-              content: message,
-            ),
-          );
+      _messageBloc.add(
+        SendMessageRequested(
+          roomId: widget.roomId,
+          content: message,
+        ),
+      );
       _messageController.clear();
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    return BlocBuilder<MessageBloc, MessageState>(
+      builder: (context, state) {
+        return SingleRoomContent(
+          roomId: widget.roomId,
+          scrollController: _scrollController,
+          messageController: _messageController,
+          onSendMessage: _sendMessage,
+        );
+      },
+    );
+  }
+}
+
+class SingleRoomContent extends StatelessWidget {
+  final String roomId;
+  final ScrollController scrollController;
+  final TextEditingController messageController;
+  final VoidCallback onSendMessage;
+
+  const SingleRoomContent({
+    Key? key,
+    required this.roomId,
+    required this.scrollController,
+    required this.messageController,
+    required this.onSendMessage,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
     final currentUser = FirebaseAuth.instance.currentUser;
 
     return Scaffold(
-      appBar: AppBar(title: Text('Room ${widget.roomId}')),
+      appBar: AppBar(title: Text('Room ${roomId}')),
       body: Column(
         children: [
           Expanded(
-            child: BlocBuilder<RoomBloc, RoomState>(
+            child: BlocBuilder<MessageBloc, MessageState>(
               builder: (context, state) {
                 if (state is MessagesLoaded) {
                   if (state.messages.isEmpty) {
@@ -64,7 +93,7 @@ class _SingleRoomViewState extends State<SingleRoomView> {
                   }
 
                   return ListView.builder(
-                    controller: _scrollController,
+                    controller: scrollController,
                     reverse: true,
                     itemCount: state.messages.length,
                     itemBuilder: (context, index) {
@@ -147,7 +176,7 @@ class _SingleRoomViewState extends State<SingleRoomView> {
               children: [
                 Expanded(
                   child: TextField(
-                    controller: _messageController,
+                    controller: messageController,
                     decoration: const InputDecoration(
                       hintText: 'Type a message...',
                       border: OutlineInputBorder(
@@ -160,12 +189,12 @@ class _SingleRoomViewState extends State<SingleRoomView> {
                     ),
                     maxLines: null,
                     textInputAction: TextInputAction.send,
-                    onSubmitted: (_) => _sendMessage(),
+                    onSubmitted: (_) => onSendMessage(),
                   ),
                 ),
                 const SizedBox(width: 8),
                 FloatingActionButton(
-                  onPressed: _sendMessage,
+                  onPressed: onSendMessage,
                   child: const Icon(Icons.send),
                 ),
               ],

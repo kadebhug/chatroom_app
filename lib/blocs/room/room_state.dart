@@ -1,7 +1,4 @@
-import 'package:equatable/equatable.dart';
-import 'package:chatroom_app/models/user.dart';
-import 'package:chatroom_app/models/room.dart';
-import 'package:chatroom_app/models/message.dart';
+part of 'room_bloc.dart';
 
 abstract class RoomState extends Equatable {
   @override

@@ -3,8 +3,6 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:chatroom_app/blocs/room/room_bloc.dart';
-import 'package:chatroom_app/blocs/room/room_event.dart';
-import 'package:chatroom_app/blocs/room/room_state.dart';
 import 'package:chatroom_app/models/room.dart';
 import 'package:go_router/go_router.dart';
 import 'package:chatroom_app/blocs/auth/auth_bloc.dart';
@@ -19,14 +17,14 @@ class HomeView extends StatefulWidget {
 }
 
 class _HomeViewState extends State<HomeView> with SingleTickerProviderStateMixin {
-  late TabController _tabController;
+  late TabController tabController;
   late RoomBloc _roomBloc;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
-    _tabController.addListener(() {
+    tabController = TabController(length: 2, vsync: this);
+    tabController.addListener(() {
       setState(() {});
     });
   }
@@ -39,27 +37,11 @@ class _HomeViewState extends State<HomeView> with SingleTickerProviderStateMixin
 
   @override
   void dispose() {
-    _tabController.dispose();
+    tabController.dispose();
     super.dispose();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 2,
-      child: _HomeViewContent(tabController: _tabController),
-    );
-  }
-}
-
-class _HomeViewContent extends StatelessWidget {
-  final TabController tabController;
-
-  const _HomeViewContent({
-    Key? key,
-    required this.tabController,
-  }) : super(key: key);
-
+  
   @override
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
@@ -193,19 +175,36 @@ class _HomeViewContent extends StatelessWidget {
   }
 }
 
-class _MyRoomsTab extends StatelessWidget {
+
+class _MyRoomsTab extends StatefulWidget {
   const _MyRoomsTab({Key? key}) : super(key: key);
 
   @override
+  State<_MyRoomsTab> createState() => _MyRoomsTabState();
+}
+
+class _MyRoomsTabState extends State<_MyRoomsTab> {
+  late RoomBloc _roomBloc;
+
+  @override
+  void initState() {
+    super.initState();
+    _roomBloc = context.read<RoomBloc>(); 
+    _roomBloc.add(LoadRoomsRequested());
+  }
+
+  @override
+  void didChangeDependencies() {
+    _roomBloc = context.read<RoomBloc>();
+    super.didChangeDependencies();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    log("IN MY ROOMS TAB");
     return BlocConsumer<RoomBloc, RoomState>(
+      bloc: context.read<RoomBloc>(),
       listener: (context, state) {
         log("STATE LISTENER: $state");
-        if (state is RoomInitial) {
-          log("IN INTIAL STATE");
-          context.read<RoomBloc>().add(LoadRoomsRequested());
-        }
         if (state is RoomFailure) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -240,17 +239,31 @@ class _MyRoomsTab extends StatelessWidget {
   }
 }
 
-class _AvailableRoomsTab extends StatelessWidget {
+class _AvailableRoomsTab extends StatefulWidget {
   const _AvailableRoomsTab({Key? key}) : super(key: key);
 
   @override
+  State<_AvailableRoomsTab> createState() => _AvailableRoomsTabState();
+}
+
+class _AvailableRoomsTabState extends State<_AvailableRoomsTab> {
+  late RoomBloc _roomBloc;
+
+  @override
+  void initState() {
+    super.initState();
+    _roomBloc = context.read<RoomBloc>(); 
+    _roomBloc.add(LoadPublicRoomsRequested());
+  }
+
+  @override
+  void didChangeDependencies() {
+    _roomBloc = context.read<RoomBloc>();
+    super.didChangeDependencies();
+  }
+  @override
   Widget build(BuildContext context) {
-    return BlocConsumer<RoomBloc, RoomState>(
-      listener: (context, state) {
-        if (state is RoomInitial) {
-          context.read<RoomBloc>().add(LoadPublicRoomsRequested());
-        }
-      },
+    return BlocBuilder<RoomBloc, RoomState>(
       builder: (context, state) {
         if (state is RoomLoading) {
           return const Center(child: CircularProgressIndicator());

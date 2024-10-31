@@ -1,6 +1,4 @@
-import 'package:equatable/equatable.dart';
-import 'package:chatroom_app/models/room.dart';
-import 'package:chatroom_app/models/message.dart';
+part of 'room_bloc.dart';
 
 abstract class RoomEvent extends Equatable {
   @override
@@ -24,7 +22,7 @@ class CreateRoomRequested extends RoomEvent {
 
 class LoadUsersRequested extends RoomEvent {}
 
-class LoadRoomsRequested extends RoomEvent {} // New event
+class LoadRoomsRequested extends RoomEvent {}
 
 class LoadMessagesRequested extends RoomEvent {
   final String roomId;

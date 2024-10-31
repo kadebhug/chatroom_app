@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:chatroom_app/blocs/app_block_observer.dart';
+import 'package:chatroom_app/blocs/message/message_bloc.dart';
 import 'package:chatroom_app/config/routes.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
@@ -55,6 +56,7 @@ void main() async {
         BlocProvider(create: (context) => ThemeBloc(prefs)),
         BlocProvider(create: (context) => authBloc),
         BlocProvider(create: (context) => RoomBloc(roomRepository: roomRepository)),
+        BlocProvider(create: (context) => MessageBloc(roomRepository: roomRepository)),
       ],
       child: const MyApp(),
     ),
