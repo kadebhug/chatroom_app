@@ -24,43 +24,21 @@ class LoadUsersRequested extends RoomEvent {}
 
 class LoadRoomsRequested extends RoomEvent {}
 
-class LoadMessagesRequested extends RoomEvent {
-  final String roomId;
-
-  LoadMessagesRequested(this.roomId);
-
-  @override
-  List<Object?> get props => [roomId];
-}
-
-class SendMessageRequested extends RoomEvent {
-  final String roomId;
-  final String content;
-
-  SendMessageRequested({
-    required this.roomId,
-    required this.content,
-  });
-
-  @override
-  List<Object?> get props => [roomId, content];
-}
-
-class _MessagesUpdated extends RoomEvent {
-  final List<Message> messages;
-
-  _MessagesUpdated(this.messages);
-
-  @override
-  List<Object?> get props => [messages];
-}
-
 class LoadPublicRoomsRequested extends RoomEvent {}
 
 class JoinRoomRequested extends RoomEvent {
   final String roomId;
 
   JoinRoomRequested(this.roomId);
+
+  @override
+  List<Object?> get props => [roomId];
+}
+
+class MarkMessagesAsRead extends RoomEvent {
+  final String roomId;
+
+  MarkMessagesAsRead(this.roomId);
 
   @override
   List<Object?> get props => [roomId];

@@ -98,6 +98,7 @@ class RoomRepository {
       content: content,
       timestamp: DateTime.now(),
       senderName: user.displayName,
+      readBy: [user.uid],
     );
 
     await _firestore
@@ -136,5 +137,47 @@ class RoomRepository {
     await _firestore.collection('rooms').doc(roomId).update({
       'members': FieldValue.arrayUnion([user.uid])
     });
+  }
+
+  Future<void> markMessagesAsRead(String roomId) async {
+    final user = _auth.currentUser;
+    if (user == null) throw Exception('User not authenticated');
+
+    // Get all messages in the room
+    final querySnapshot = await _firestore
+        .collection('rooms')
+        .doc(roomId)
+        .collection('messages')
+        .get();
+
+    // Mark unread messages as read
+    final batch = _firestore.batch();
+    for (var doc in querySnapshot.docs) {
+      final readBy = List<String>.from(doc.data()['readBy'] ?? []);
+      if (!readBy.contains(user.uid)) {
+        batch.update(doc.reference, {
+          'readBy': FieldValue.arrayUnion([user.uid])
+        });
+      }
+    }
+    await batch.commit();
+  }
+
+  Stream<int> getUnreadMessageCount(String roomId) {
+    final user = _auth.currentUser;
+    if (user == null) throw Exception('User not authenticated');
+
+    return _firestore
+        .collection('rooms')
+        .doc(roomId)
+        .collection('messages')
+        .orderBy('timestamp', descending: true)
+        .snapshots()
+        .map((snapshot) {
+          return snapshot.docs
+              .where((doc) => !(doc.data()['readBy'] as List<dynamic>)
+                  .contains(user.uid))
+              .length;
+        });
   }
 }

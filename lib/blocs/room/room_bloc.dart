@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:bloc/bloc.dart';
-import 'package:chatroom_app/models/message.dart';
 import 'package:chatroom_app/models/room.dart';
 import 'package:chatroom_app/models/user.dart';
 import 'package:chatroom_app/repositories/room_repository.dart';
@@ -20,6 +19,7 @@ class RoomBloc extends Bloc<RoomEvent, RoomState> {
     on<LoadRoomsRequested>(_onLoadRoomsRequested);
     on<LoadPublicRoomsRequested>(_onLoadPublicRoomsRequested);
     on<JoinRoomRequested>(_onJoinRoomRequested);
+    on<MarkMessagesAsRead>(_onMarkMessagesAsRead);
   }
 
   void _onCreateRoomRequested(
@@ -60,15 +60,8 @@ class RoomBloc extends Bloc<RoomEvent, RoomState> {
     try {
       await emit.forEach<List<Room>>(
         _roomRepository.getRooms(),
-        onData: (rooms) {
-          if (rooms.isEmpty) {
-            return RoomsEmpty();
-          }
-          return MyRoomsLoaded(rooms);
-        },
-        onError: (error, stackTrace) {
-          return RoomFailure(error.toString());
-        },
+        onData: (rooms) => rooms.isEmpty ? RoomsEmpty() : MyRoomsLoaded(rooms),
+        onError: (error, stackTrace) => RoomFailure(error.toString()),
       );
     } catch (e) {
       emit(RoomFailure(e.toString()));
@@ -97,7 +90,17 @@ class RoomBloc extends Bloc<RoomEvent, RoomState> {
   ) async {
     try {
       await _roomRepository.joinRoom(event.roomId);
-      // The rooms list will automatically update through the stream
+    } catch (e) {
+      emit(RoomFailure(e.toString()));
+    }
+  }
+
+  Future<void> _onMarkMessagesAsRead(
+    MarkMessagesAsRead event,
+    Emitter<RoomState> emit,
+  ) async {
+    try {
+      await _roomRepository.markMessagesAsRead(event.roomId);
     } catch (e) {
       emit(RoomFailure(e.toString()));
     }

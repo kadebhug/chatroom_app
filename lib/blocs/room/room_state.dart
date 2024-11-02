@@ -45,13 +45,13 @@ class RoomsLoaded extends RoomState {
   List<Object?> get props => [rooms];
 }
 
-class MessagesLoaded extends RoomState {
-  final List<Message> messages;
+class MyRoomsLoaded extends RoomState {
+  final List<Room> rooms;
 
-  MessagesLoaded(this.messages);
+  MyRoomsLoaded(this.rooms);
 
   @override
-  List<Object?> get props => [messages];
+  List<Object?> get props => [rooms];
 }
 
 class PublicRoomsLoaded extends RoomState {
@@ -63,16 +63,4 @@ class PublicRoomsLoaded extends RoomState {
   List<Object?> get props => [rooms];
 }
 
-class RoomsEmpty extends RoomState {
-  @override
-  List<Object?> get props => [];
-}
-
-class MyRoomsLoaded extends RoomState {
-  final List<Room> rooms;
-
-  MyRoomsLoaded(this.rooms);
-
-  @override
-  List<Object?> get props => [rooms];
-}
+class RoomsEmpty extends RoomState {}

@@ -7,6 +7,7 @@ class Message {
   final String content;
   final DateTime timestamp;
   final String? senderName;
+  final List<String> readBy;
 
   Message({
     required this.id,
@@ -15,7 +16,8 @@ class Message {
     required this.content,
     required this.timestamp,
     this.senderName,
-  });
+    List<String>? readBy,
+  }) : readBy = readBy ?? [];
 
   Map<String, dynamic> toMap() {
     return {
@@ -24,6 +26,7 @@ class Message {
       'content': content,
       'timestamp': Timestamp.fromDate(timestamp),
       'senderName': senderName,
+      'readBy': readBy,
     };
   }
 
@@ -35,6 +38,7 @@ class Message {
       content: map['content'] as String,
       timestamp: (map['timestamp'] as Timestamp).toDate(),
       senderName: map['senderName'] as String?,
+      readBy: List<String>.from(map['readBy'] ?? []),
     );
   }
 } 

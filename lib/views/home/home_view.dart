@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 import 'package:chatroom_app/blocs/auth/auth_bloc.dart';
 import 'package:chatroom_app/blocs/auth/auth_event.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:chatroom_app/repositories/room_repository.dart';
 
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
@@ -445,28 +446,63 @@ class RoomListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      leading: Icon(
-        room.type == RoomType.private
-            ? Icons.lock_outline
-            : Icons.public,
-      ),
-      title: Text(room.name),
-      subtitle: Text(
-        '${room.members.length} member${room.members.length == 1 ? '' : 's'}',
-      ),
-      trailing: showJoinButton
-          ? ElevatedButton(
-              onPressed: onJoin,
-              child: const Text('Join'),
-            )
-          : Text(
-              room.type == RoomType.private ? 'Private' : 'Public',
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.secondary,
-              ),
-            ),
-      onTap: showJoinButton ? null : () => context.go('/rooms/${room.id}'),
+    return StreamBuilder<int>(
+      stream: context.read<RoomRepository>().getUnreadMessageCount(room.id),
+      builder: (context, snapshot) {
+        final unreadCount = snapshot.data ?? 0;
+
+        return ListTile(
+          leading: Icon(
+            room.type == RoomType.private
+                ? Icons.lock_outline
+                : Icons.public,
+          ),
+          title: Text(room.name),
+          subtitle: Text(
+            '${room.members.length} member${room.members.length == 1 ? '' : 's'}',
+          ),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (unreadCount > 0)
+                Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primary,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Text(
+                    unreadCount.toString(),
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onPrimary,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+              const SizedBox(width: 8),
+              if (showJoinButton)
+                ElevatedButton(
+                  onPressed: onJoin,
+                  child: const Text('Join'),
+                )
+              else
+                Text(
+                  room.type == RoomType.private ? 'Private' : 'Public',
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.secondary,
+                  ),
+                ),
+            ],
+          ),
+          onTap: showJoinButton
+              ? null
+              : () {
+                  // Mark messages as read when entering the room
+                  context.read<RoomBloc>().add(MarkMessagesAsRead(room.id));
+                  context.go('/rooms/${room.id}');
+                },
+        );
+      },
     );
   }
 }

@@ -1,4 +1,4 @@
-import 'package:chatroom_app/repositories/room_repository.dart';
+import 'package:chatroom_app/blocs/room/room_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:chatroom_app/blocs/message/message_bloc.dart';
@@ -17,12 +17,15 @@ class _SingleRoomViewState extends State<SingleRoomView> {
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   late MessageBloc _messageBloc;
+  late RoomBloc _roomBloc;
 
   @override
   void initState() {
     super.initState();
     _messageBloc = context.read<MessageBloc>();
+    _roomBloc = context.read<RoomBloc>();
     _messageBloc.add(LoadMessagesRequested(widget.roomId));
+    _roomBloc.add(MarkMessagesAsRead(widget.roomId));
   }
 
   @override
