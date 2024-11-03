@@ -64,3 +64,12 @@ class PublicRoomsLoaded extends RoomState {
 }
 
 class RoomsEmpty extends RoomState {}
+
+class RoomDetailsLoaded extends RoomState {
+  final Room room;
+
+  RoomDetailsLoaded(this.room);
+
+  @override
+  List<Object?> get props => [room];
+}

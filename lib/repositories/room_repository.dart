@@ -180,4 +180,57 @@ class RoomRepository {
               .length;
         });
   }
+
+  Stream<Room> getRoomDetails(String roomId) {
+    return _firestore
+        .collection('rooms')
+        .doc(roomId)
+        .snapshots()
+        .map((doc) => Room.fromMap(doc.id, doc.data()!));
+  }
+
+  Future<void> updateRoomName(String roomId, String newName) async {
+    await _firestore.collection('rooms').doc(roomId).update({
+      'name': newName,
+    });
+  }
+
+  Future<void> leaveRoom(String roomId) async {
+    final user = _auth.currentUser;
+    if (user == null) throw Exception('User not authenticated');
+
+    await _firestore.collection('rooms').doc(roomId).update({
+      'members': FieldValue.arrayRemove([user.uid])
+    });
+  }
+
+  Future<void> deleteRoom(String roomId) async {
+    final user = _auth.currentUser;
+    if (user == null) throw Exception('User not authenticated');
+
+    // Get room data to verify creator
+    final roomDoc = await _firestore.collection('rooms').doc(roomId).get();
+    final room = Room.fromMap(roomDoc.id, roomDoc.data()!);
+
+    if (room.createdBy != user.uid) {
+      throw Exception('Only the room creator can delete the room');
+    }
+
+    // Delete all messages in the room
+    final messages = await _firestore
+        .collection('rooms')
+        .doc(roomId)
+        .collection('messages')
+        .get();
+    
+    final batch = _firestore.batch();
+    for (var message in messages.docs) {
+      batch.delete(message.reference);
+    }
+    
+    // Delete the room document
+    batch.delete(_firestore.collection('rooms').doc(roomId));
+    
+    await batch.commit();
+  }
 }

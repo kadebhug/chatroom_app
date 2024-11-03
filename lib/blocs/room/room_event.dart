@@ -43,3 +43,40 @@ class MarkMessagesAsRead extends RoomEvent {
   @override
   List<Object?> get props => [roomId];
 }
+
+class LoadRoomDetailsRequested extends RoomEvent {
+  final String roomId;
+
+  LoadRoomDetailsRequested(this.roomId);
+
+  @override
+  List<Object?> get props => [roomId];
+}
+
+class UpdateRoomNameRequested extends RoomEvent {
+  final String roomId;
+  final String newName;
+
+  UpdateRoomNameRequested(this.roomId, this.newName);
+
+  @override
+  List<Object?> get props => [roomId, newName];
+}
+
+class LeaveRoomRequested extends RoomEvent {
+  final String roomId;
+
+  LeaveRoomRequested(this.roomId);
+
+  @override
+  List<Object?> get props => [roomId];
+}
+
+class DeleteRoomRequested extends RoomEvent {
+  final String roomId;
+
+  DeleteRoomRequested(this.roomId);
+
+  @override
+  List<Object?> get props => [roomId];
+}
